@@ -24,6 +24,8 @@
       Modal.prototype.keyControl = true;
 
       function Modal() {
+        this.onLastInputKeydown = __bind(this.onLastInputKeydown, this);
+        this.onFirstInputKeydown = __bind(this.onFirstInputKeydown, this);
         this.triggerCancel = __bind(this.triggerCancel, this);
         this.triggerSubmit = __bind(this.triggerSubmit, this);
         this.triggerView = __bind(this.triggerView, this);
@@ -132,15 +134,24 @@
       };
 
       Modal.prototype.delegateModalEvents = function() {
-        var cancelEl, key, match, selector, submitEl, trigger, _results;
+        var cancelEl, inputs, key, match, selector, submitEl, trigger, _results;
         this.active = true;
         cancelEl = this.getOption('cancelEl');
         submitEl = this.getOption('submitEl');
+        inputs = this.$el.find("a, select, input, textarea, button");
+        this.$firstInput = inputs.first();
+        this.$lastInput = inputs.last();
         if (submitEl) {
           this.$el.on('click', submitEl, this.triggerSubmit);
         }
         if (cancelEl) {
           this.$el.on('click', cancelEl, this.triggerCancel);
+        }
+        if (this.$firstInput) {
+          this.$firstInput.on('keydown', this.onFirstInputKeydown);
+        }
+        if (this.$lastInput) {
+          this.$lastInput.on('keydown', this.onLastInputKeydown);
         }
         _results = [];
         for (key in this.views) {
@@ -166,6 +177,12 @@
         }
         if (cancelEl) {
           this.$el.off('click', cancelEl, this.triggerCancel);
+        }
+        if (this.$firstInput) {
+          this.$firstInput.off('keydown', this.onFirstInputKeydown);
+        }
+        if (this.$lastInput) {
+          this.$lastInput.off('keydown', this.onLastInputKeydown);
         }
         _results = [];
         for (key in this.views) {
@@ -368,6 +385,20 @@
           return this.trigger('modal:destroy');
         } else {
           return this.destroy();
+        }
+      };
+
+      Modal.prototype.onFirstInputKeydown = function(e) {
+        if (e.which === 9 && e.shiftKey) {
+          e.preventDefault();
+          return this.$lastInput.focus();
+        }
+      };
+
+      Modal.prototype.onLastInputKeydown = function(e) {
+        if (e.which === 9 && !e.shiftKey) {
+          e.preventDefault();
+          return this.$firstInput.focus();
         }
       };
 

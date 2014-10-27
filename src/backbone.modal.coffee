@@ -105,9 +105,16 @@
       cancelEl = @getOption('cancelEl')
       submitEl = @getOption('submitEl')
 
+      # get all input elements
+      inputs = @$el.find("a, select, input, textarea, button")
+      @$firstInput = inputs.first()
+      @$lastInput = inputs.last()
+
       # set event handlers for submit and cancel
       @$el.on('click', submitEl, @triggerSubmit) if submitEl
       @$el.on('click', cancelEl, @triggerCancel) if cancelEl
+      @$firstInput.on('keydown', @onFirstInputKeydown) if @$firstInput
+      @$lastInput.on('keydown', @onLastInputKeydown) if @$lastInput
 
       # set event handlers for views
       for key of @views
@@ -128,6 +135,8 @@
       # remove event handlers for submit and cancel
       @$el.off('click', submitEl, @triggerSubmit) if submitEl
       @$el.off('click', cancelEl, @triggerCancel) if cancelEl
+      @$firstInput.off('keydown', @onFirstInputKeydown) if @$firstInput
+      @$lastInput.off('keydown', @onLastInputKeydown) if @$lastInput
 
       # remove event handlers for views
       for key of @views
@@ -249,6 +258,16 @@
         @trigger('modal:destroy')
       else
         @destroy()
+
+    onFirstInputKeydown: (e) =>
+      if (e.which == 9 && e.shiftKey)
+        e.preventDefault()
+        @$lastInput.focus()
+
+    onLastInputKeydown: (e) =>
+      if (e.which == 9 && !e.shiftKey)
+        e.preventDefault()
+        @$firstInput.focus()
 
     destroy: ->
       Backbone.$('body').off('keyup', @checkKey)
