@@ -77,10 +77,20 @@
       };
 
       Modal.prototype.rendererCompleted = function() {
-        var _ref;
+        var focus, _ref;
         if (this.keyControl) {
           Backbone.$('body').on('keyup', this.checkKey);
           Backbone.$('body').on('click', this.clickOutside);
+        }
+        focus = this.getOption('focusEl');
+        if (focus === 'first') {
+          this.$firstInput.focus();
+        }
+        if (focus === 'last') {
+          this.$lastInput.focus();
+        }
+        if (focus) {
+          this.$el.find(focus).focus();
         }
         this.modalEl.css({
           opacity: 1
@@ -134,11 +144,15 @@
       };
 
       Modal.prototype.delegateModalEvents = function() {
-        var cancelEl, inputs, key, match, selector, submitEl, trigger, _results;
+        var cancelEl, focusable, inputs, key, match, selector, submitEl, trigger, _results;
         this.active = true;
         cancelEl = this.getOption('cancelEl');
         submitEl = this.getOption('submitEl');
-        inputs = this.$el.find("a, select, input, textarea, button");
+        focusable = "a[href], select, input, textarea, button, [tabindex]";
+        if (this.getOption('focusable')) {
+          focusable = this.getOption('focusable');
+        }
+        inputs = this.$el.find(focusable);
         this.$firstInput = inputs.first();
         this.$lastInput = inputs.last();
         if (submitEl) {

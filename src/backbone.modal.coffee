@@ -64,6 +64,17 @@
         Backbone.$('body').on('keyup', @checkKey)
         Backbone.$('body').on('click', @clickOutside)
 
+      # handle focus option
+      focus = @getOption('focusEl')
+      if (focus == 'first')
+        @$firstInput.focus()
+
+      if (focus == 'last')
+        @$lastInput.focus()
+
+      if (focus)
+        @$el.find(focus).focus()
+
       @modalEl.css(opacity: 1).addClass("#{@prefix}-modal--open")
       @onShow?()
       @currentView?.onShow?()
@@ -105,12 +116,20 @@
       cancelEl = @getOption('cancelEl')
       submitEl = @getOption('submitEl')
 
-      # get all input elements
-      inputs = @$el.find("a, select, input, textarea, button")
+      # get all focusable elements
+      focusable = "a[href], select, input, textarea, button, [tabindex]"
+
+      # if focusable option is set
+      # then overwrite the defaults
+      if (@getOption('focusable'))
+        focusable = @getOption('focusable')
+
+      # find all focusable inputs, define first and last
+      inputs = @$el.find(focusable)
       @$firstInput = inputs.first()
       @$lastInput = inputs.last()
 
-      # set event handlers for submit and cancel
+      # set event handlers
       @$el.on('click', submitEl, @triggerSubmit) if submitEl
       @$el.on('click', cancelEl, @triggerCancel) if cancelEl
       @$firstInput.on('keydown', @onFirstInputKeydown) if @$firstInput
@@ -209,9 +228,9 @@
       if Backbone.$('tester').length isnt 0 then Backbone.$('tester').replaceWith tester else Backbone.$('body').append tester
 
       if @viewContainer
-        container     = tester.find(@viewContainer)
+        container = tester.find(@viewContainer)
       else
-        container     = tester.find(".#{@prefix}-modal")
+        container = tester.find(".#{@prefix}-modal")
 
       container.removeAttr('style')
 
